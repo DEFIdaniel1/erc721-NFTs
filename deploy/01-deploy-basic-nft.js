@@ -2,7 +2,7 @@ const { verifyMessage } = require('ethers/lib/utils')
 const { network, ethers } = require('hardhat')
 const { verify } = require('../utils/verify')
 
-async function main({ getNamedAccounts, deployments }) {
+module.exports = async function main({ getNamedAccounts, deployments }) {
     const { deploy } = deployments
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
@@ -20,8 +20,3 @@ async function main({ getNamedAccounts, deployments }) {
         await verify(nftContract.address, args)
     }
 }
-
-module.exports = main().catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-})
