@@ -10,7 +10,7 @@ contract BasicNFT is ERC721 {
     uint256 private s_tokenCounter;
 
     //constructor(string memory name_, string memory symbol_) {
-    constructor() ERC721('louieNFT', 'louie') {
+    constructor() ERC721('louieNFT', 'LOUIE') {
         s_tokenCounter = 0;
     }
 
