@@ -2,21 +2,26 @@ const { verifyMessage } = require('ethers/lib/utils')
 const { network, ethers } = require('hardhat')
 const { verify } = require('../utils/verify')
 
-module.exports = async ({ getNamedAccounts, deployments }) => {
-    const { deploy, log } = deployments
+async function main({ getNamedAccounts, deployments }) {
+    const { deploy } = deployments
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
+    const args = []
 
     const nftContract = await deploy('BasicNFT', {
         contract: 'BasicNFT',
         from: deployer,
         log: true,
-        args: [],
+        args: args,
+        waitConfirmations: network.config.blockConfirmations || 1,
     })
 
     if (chainId != 31337) {
-        await verify(nftContract.address, [])
+        await verify(nftContract.address, args)
     }
-
-    // const basicNFTContract = await ethers.getContract('BasicNFT')
 }
+
+module.exports = main().catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+})
