@@ -1,4 +1,3 @@
-const { verifyMessage } = require('ethers/lib/utils')
 const { network, ethers } = require('hardhat')
 const { verify } = require('../utils/verify')
 
@@ -20,3 +19,5 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         await verify(nftContract.address, args)
     }
 }
+
+module.exports.tags = ['all', 'basic']

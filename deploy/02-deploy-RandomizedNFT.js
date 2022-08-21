@@ -1,0 +1,83 @@
+const { network, ethers } = require('hardhat')
+const { developmentChains, networkConfig } = require('../helper-hardhat-config')
+const { verify } = require('../utils/verify')
+const { storeImages, storeTokenURIMetadata } = require('../utils/uploadToPinata')
+
+const imagesLocation = './NFT-images/random'
+const pinataUploadStatus = process.env.UPLOAD_TO_PINATA
+const chainId = network.config.chainId
+const metadataTemplate = {
+    name: '',
+    description: '',
+    image: '',
+    attributes: [{ trait_types: '', value: 100 }],
+}
+
+module.exports = async function main({ getNamedAccounts, deployments }) {
+    const { deployer } = await getNamedAccounts()
+    const { deploy, log } = deployments
+    let vrfCoordinatorV2Address, subscriptionId, tokenURIs
+
+    // For the URIs, we need to upload the images, get IPFS hashes
+    // 3 methods: yourself, a centralied service like pinata, nft.storage(uses filecoin)
+    // only doing pinata here
+    if (pinataUploadStatus == 'true') {
+        tokenURIs = await handleTokenUris()
+    } else {
+        log(`IPFS status = ${pinataUploadStatus}. No IPFS upload.`)
+    }
+
+    if (developmentChains.includes(network.name)) {
+        const vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock')
+        vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address
+        const tx = await vrfCoordinatorV2Mock.createSubscription()
+        const txReceipt = await tx.wait(1)
+        subscriptionId = txReceipt.events[0].args.subId
+    } else {
+        vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
+        subscriptionId = networkConfig[chainId].subscriptionId
+    }
+
+    const args = [
+        vrfCoordinatorV2Address,
+        subscriptionId,
+        networkConfig[chainId].gasLane,
+        networkConfig[chainId].callbackGasLimit,
+        tokenURIs,
+        networkConfig[chainId].mintFee,
+    ]
+
+    const randomizedNftContract = await deploy('RandomizedNFT', {
+        contract: 'RandomizedNFT',
+        from: deployer,
+        args: args,
+        log: true,
+        // waitConfirmations: networkConfig.blockConfirmations || 1,
+    })
+    log('----------randomizedNFT contract deployed-------------------')
+    if (chainId != 31337) {
+        await verify(randomizedNftContract.address, args)
+    }
+}
+
+async function handleTokenUris() {
+    console.log('------------IPFS Upload----------------------')
+    tokenURIs = []
+    const { responses: imageUploadResponses, files } = await storeImages(imagesLocation)
+    // imageuploadresponses is an object with IpfsHash as one of the items
+    // files are the file names 'image.png'
+    for (i in imageUploadResponses) {
+        let tokenURIMetadata = metadataTemplate
+        tokenURIMetadata.name = files[i].replace('.jpg', '').replace('-', ' ') //remove .jpg and - from file names
+        tokenURIMetadata.description = `One of a kind, original art work by Louie Pisterzi.`
+        tokenURIMetadata.image = `ipfs://${imageUploadResponses[i].IpfsHash}` //image hashes
+        console.log(`Uploading JSON file ${tokenURIMetadata.name}...`)
+        const uploadResponse = await storeTokenURIMetadata(tokenURIMetadata) //upload to IPFS
+        tokenURIs.push(uploadResponse.IpfsHash) //hash from the JSON metadata files
+    }
+    console.log('Token URIs...' + tokenURIs)
+    console.log('------------------------------------------------')
+    return tokenURIs
+}
+
+module.exports.tags = ['all', 'random']
