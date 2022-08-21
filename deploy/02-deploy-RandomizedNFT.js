@@ -12,7 +12,8 @@ const metadataTemplate = {
     image: '',
     attributes: [{ trait_types: '', value: 100 }],
 }
-let tokenURIs = randomNFTTokenURIs
+const tokenURIs = randomNFTTokenURIs
+let vrfCoordinatorV2Mock
 
 module.exports = async function main({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
@@ -29,7 +30,7 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
     }
 
     if (developmentChains.includes(network.name)) {
-        const vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock')
+        vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock')
         vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address
         const tx = await vrfCoordinatorV2Mock.createSubscription()
         const txReceipt = await tx.wait(1)
@@ -53,9 +54,15 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         from: deployer,
         args: args,
         log: true,
-        // waitConfirmations: networkConfig.blockConfirmations || 1,
+        waitConfirmations: networkConfig.blockConfirmations || 1,
     })
     log('----------randomizedNFT contract deployed-------------------')
+
+    if (chainId == 31337) {
+        //need to add consumer AFTER deploying contract
+        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, randomizedNftContract.address)
+        log('VRF mock consumer added!')
+    }
     if (chainId != 31337) {
         await verify(randomizedNftContract.address, args)
     }

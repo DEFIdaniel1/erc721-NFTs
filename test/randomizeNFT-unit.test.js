@@ -1,4 +1,4 @@
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const { deployments, ethers, network, log } = require('hardhat')
 const { networkConfig, randomNFTTokenURIs } = require('../helper-hardhat-config')
 
@@ -40,6 +40,33 @@ describe.only('Randomize NFT Unit Test', function () {
                 exectedURI = expectedValue[i]
                 assert.equal(exectedURI, uriValue)
             }
+        })
+    })
+    describe('requestNFT function', async function () {
+        const mintFee = networkConfig[chainId].mintFee
+        it('Reverts if payment is not enough', async function () {
+            const lessMintFee = mintFee.value - 1
+            await expect(
+                randomizedNFTContract.requestNFT({ value: lessMintFee })
+            ).to.be.revertedWithCustomError(
+                randomizedNFTContract,
+                'RandomizedNFT__NeedMoreETHToMint'
+            )
+        })
+        it('Emits event NFTRequested', async function () {
+            await expect(randomizedNFTContract.requestNFT({ value: mintFee })).to.emit(
+                randomizedNFTContract,
+                'NFTRequested'
+            )
+        })
+        it('Maps requestIdToSender', async function () {
+            await randomizedNFTContract.requestNFT({ value: mintFee })
+            await randomizedNFTContract.connect(account1).requestNFT({ value: mintFee })
+            //Mapping starts at 1, not 0
+            const nftAccountMapToDeployer = await randomizedNFTContract.s_requestIdToSender(1)
+            assert.equal(nftAccountMapToDeployer, deployer.address)
+            const nftAccountMapToAccount1 = await randomizedNFTContract.s_requestIdToSender(2)
+            assert.equal(nftAccountMapToAccount1, account1.address)
         })
     })
 })
