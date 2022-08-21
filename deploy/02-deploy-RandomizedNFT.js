@@ -1,5 +1,5 @@
 const { network, ethers } = require('hardhat')
-const { developmentChains, networkConfig } = require('../helper-hardhat-config')
+const { developmentChains, networkConfig, randomNFTTokenURIs } = require('../helper-hardhat-config')
 const { verify } = require('../utils/verify')
 const { storeImages, storeTokenURIMetadata } = require('../utils/uploadToPinata')
 
@@ -12,11 +12,12 @@ const metadataTemplate = {
     image: '',
     attributes: [{ trait_types: '', value: 100 }],
 }
+let tokenURIs = randomNFTTokenURIs
 
 module.exports = async function main({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
     const { deploy, log } = deployments
-    let vrfCoordinatorV2Address, subscriptionId, tokenURIs
+    let vrfCoordinatorV2Address, subscriptionId
 
     // For the URIs, we need to upload the images, get IPFS hashes
     // 3 methods: yourself, a centralied service like pinata, nft.storage(uses filecoin)
@@ -75,7 +76,7 @@ async function handleTokenUris() {
         const uploadResponse = await storeTokenURIMetadata(tokenURIMetadata) //upload to IPFS
         tokenURIs.push(uploadResponse.IpfsHash) //hash from the JSON metadata files
     }
-    console.log('Token URIs...' + tokenURIs)
+    console.log(tokenURIs)
     console.log('------------------------------------------------')
     return tokenURIs
 }

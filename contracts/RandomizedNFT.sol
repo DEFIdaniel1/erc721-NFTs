@@ -23,7 +23,7 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane; //keyHash
-    uint32 private immutable i_callBackGasLimit;
+    uint32 private immutable i_callbackGasLimit;
     uint32 private constant NUM_WORDS = 1;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
 
@@ -44,14 +44,14 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         address vrfCoordinatorV2,
         uint64 subscriptionId,
         bytes32 gasLane,
-        uint32 callBackGasLimit,
+        uint32 callbackGasLimit,
         string[3] memory tokenURIs,
         uint256 mintFee
     ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721('Random Doggo', 'RANDY') {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
-        i_callBackGasLimit = callBackGasLimit;
+        i_callbackGasLimit = callbackGasLimit;
         s_tokenURIs = tokenURIs;
         i_mintFee = mintFee;
     }
@@ -66,7 +66,7 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
             i_gasLane,
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
-            i_callBackGasLimit,
+            i_callbackGasLimit,
             NUM_WORDS
         );
         //need to map the request to sender b/c chainlink will be the one sending the second part of transaction
@@ -86,6 +86,7 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
 
         Breed nftBreed = getBreedFromModdedRng(moddedRng);
         _safeMint(nftOwner, newTokenId);
+        s_tokenCounter++;
         // passing in the nftBreed is actually a NUMBER 0, 1, 2;
         // so will output the corresponding tokenURI when in the same order
         _setTokenURI(newTokenId, s_tokenURIs[uint256(nftBreed)]);
@@ -112,7 +113,7 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     function getChanceArray() public pure returns (uint256[3] memory) {
         // 10% chance for 1st array item; 20% for second array item; 70%
         //      0-10 = PUG
-        //      10-20 = SHIBA_INU
+        //      10-30 = SHIBA_INU
         //      30-100 = ST_BERNARD
         return [10, 30, MAX_CHANCE_VALUE];
     }
@@ -136,5 +137,17 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
 
     function getTokenCounter() public view returns (uint256) {
         return s_tokenCounter;
+    }
+
+    function getCallbackGasLimit() public view returns (uint256) {
+        return i_callbackGasLimit;
+    }
+
+    function getGasLane() public view returns (bytes32) {
+        return i_gasLane;
+    }
+
+    function getSubscriptionId() public view returns (uint256) {
+        return i_subscriptionId;
     }
 }

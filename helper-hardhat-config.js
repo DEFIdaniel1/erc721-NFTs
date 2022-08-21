@@ -7,6 +7,7 @@ const networkConfig = {
         callbackGasLimit: '500000', // 500,000 gas
         mintFee: '10000000000000000', // 0.01 ETH
         blockConfirmations: 1,
+        subscriptionId: 'vrfCoordinatorV2Mock',
     },
     4: {
         name: 'rinkeby',
@@ -37,10 +38,16 @@ const networkConfig = {
 const developmentChains = ['hardhat', 'localhost']
 const DECIMALS = '18'
 const INITIAL_PRICE = '200000000000000000000'
+const randomNFTTokenURIs = [
+    'QmaHJeNRETkCgpvUrd5xxmAhea6eoUpsdtXqy3Cwym2GAM',
+    'QmcztQp4He8sf3hfSe4A3mQGEvpjfPD6x3cweYpmqw5K9K',
+    'QmPeQgDwgzRsQJyVfq8vgqmN4zxGwoVxRzi34z8YC4cdgf',
+]
 
 module.exports = {
     networkConfig,
     developmentChains,
     DECIMALS,
     INITIAL_PRICE,
+    randomNFTTokenURIs,
 }

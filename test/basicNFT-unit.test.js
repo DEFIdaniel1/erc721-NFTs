@@ -1,10 +1,9 @@
 const { assert } = require('chai')
-const { getNamedAccounts, deployments, ethers } = require('hardhat')
+const { ethers } = require('hardhat')
 
 describe('BasicNFT Unit Test', function () {
     let deploy, deployer, basicNFTContract
     beforeEach(async function () {
-        deploy = deployments.deploy
         accounts = await ethers.getSigners()
         deployer = accounts[0]
         const BasicNFTContract = await ethers.getContractFactory('BasicNFT')
