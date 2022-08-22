@@ -61,7 +61,7 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         if (msg.value < i_mintFee) {
             revert RandomizedNFT__NeedMoreETHToMint();
         }
-        // get random number
+        // get random number, requestIds will start at 1 and increase with each mint
         requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -80,16 +80,14 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         //map user from requestNFT function as owner
         address nftOwner = s_requestIdToSender[requestId];
         uint256 newTokenId = s_tokenCounter;
-
         uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
         // randomWords will return MASSIVE NUMBER, divide by 100 means, get 0-99
-
         Breed nftBreed = getBreedFromModdedRng(moddedRng);
         _safeMint(nftOwner, newTokenId);
-        s_tokenCounter++;
         // passing in the nftBreed is actually a NUMBER 0, 1, 2;
         // so will output the corresponding tokenURI when in the same order
         _setTokenURI(newTokenId, s_tokenURIs[uint256(nftBreed)]);
+        s_tokenCounter++;
         emit NFTMinted(nftBreed, nftOwner);
     }
 

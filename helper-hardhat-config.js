@@ -38,6 +38,7 @@ const networkConfig = {
 const developmentChains = ['hardhat', 'localhost']
 const DECIMALS = '18'
 const INITIAL_PRICE = '200000000000000000000'
+const VRF_SUB_FUND_AMOUNT = '10000000000000000000' //10 LINK
 const randomNFTTokenURIs = [
     'QmaHJeNRETkCgpvUrd5xxmAhea6eoUpsdtXqy3Cwym2GAM',
     'QmcztQp4He8sf3hfSe4A3mQGEvpjfPD6x3cweYpmqw5K9K',
@@ -50,4 +51,5 @@ module.exports = {
     DECIMALS,
     INITIAL_PRICE,
     randomNFTTokenURIs,
+    VRF_SUB_FUND_AMOUNT,
 }

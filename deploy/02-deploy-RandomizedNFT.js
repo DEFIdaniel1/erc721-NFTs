@@ -1,5 +1,10 @@
 const { network, ethers } = require('hardhat')
-const { developmentChains, networkConfig, randomNFTTokenURIs } = require('../helper-hardhat-config')
+const {
+    developmentChains,
+    networkConfig,
+    randomNFTTokenURIs,
+    VRF_SUB_FUND_AMOUNT,
+} = require('../helper-hardhat-config')
 const { verify } = require('../utils/verify')
 const { storeImages, storeTokenURIMetadata } = require('../utils/uploadToPinata')
 
@@ -13,13 +18,13 @@ const metadataTemplate = {
     attributes: [{ trait_types: '', value: 100 }],
 }
 const tokenURIs = randomNFTTokenURIs
+const vrfSubFundAmount = VRF_SUB_FUND_AMOUNT
 let vrfCoordinatorV2Mock
 
 module.exports = async function main({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
     const { deploy, log } = deployments
     let vrfCoordinatorV2Address, subscriptionId
-
     // For the URIs, we need to upload the images, get IPFS hashes
     // 3 methods: yourself, a centralied service like pinata, nft.storage(uses filecoin)
     // only doing pinata here
@@ -62,6 +67,9 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         //need to add consumer AFTER deploying contract
         await vrfCoordinatorV2Mock.addConsumer(subscriptionId, randomizedNftContract.address)
         log('VRF mock consumer added!')
+        //need to fund it with LINK or tests will fail
+        await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, vrfSubFundAmount)
+        log('VRF mock contract funded.')
     }
     if (chainId != 31337) {
         await verify(randomizedNftContract.address, args)
