@@ -4,7 +4,7 @@ const { networkConfig, randomNFTTokenURIs, developmentChains } = require('../hel
 
 !developmentChains.includes(network.name)
     ? describe.skip
-    : describe.only('Randomize NFT Unit Test', function () {
+    : describe('Randomize NFT Unit Test', function () {
           const chainId = network.config.chainId
           let deployer, randomizedNFTContract, account1, vrfCoordinatorV2Mock
           const mintFee = networkConfig[chainId].mintFee
