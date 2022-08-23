@@ -1,4 +1,3 @@
-//to help determine which chain we're on
 const networkConfig = {
     31337: {
         name: 'localhost',
