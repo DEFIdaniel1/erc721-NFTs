@@ -8,12 +8,13 @@ import 'base64-sol/base64.sol';
 error DynamicSvgNFT__TokenIdDoesNotExist();
 
 contract DynamicSvgNFT is ERC721 {
-    uint256 private s_tokenCounter;
+    uint256 private s_tokenIdCounter;
     string private s_lowImageURI;
     string private s_highImageURI;
     AggregatorV3Interface internal immutable i_priceFeed;
     string private constant base64EncodedSvgPrefix = 'data:image/svg+xml;base64,';
 
+    // highValue is the inflection point selected by each user for ETH price to render a different NFT image
     mapping(uint256 => uint256) public s_tokenIdToHighValue;
 
     event NFTMinted(uint256 indexed tokenId, uint256 highValue);
@@ -22,28 +23,24 @@ contract DynamicSvgNFT is ERC721 {
         address priceFeedAddress,
         string memory lowSvg,
         string memory highSvg
-    ) ERC721('Dynamic SVG NFT', 'DYNFT') {
-        s_tokenCounter = 0;
-        // don't want to store images as SVG files, want them as bytes
+    ) ERC721('Dynamic SVG NFT', 'DYNAMO') {
+        s_tokenIdCounter = 0;
         s_lowImageURI = svgToImageURI(lowSvg);
         s_highImageURI = svgToImageURI(highSvg);
         i_priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
+    // Converts SVGs to bytes + prepends SVG prefix so it can be rendered
     function svgToImageURI(string memory svg) public pure returns (string memory) {
         string memory svgBase64Encoded = Base64.encode(bytes(string(abi.encodePacked(svg))));
         return string(abi.encodePacked(base64EncodedSvgPrefix, svgBase64Encoded));
     }
 
     function mintNft(uint256 highValue) public {
-        s_tokenIdToHighValue[s_tokenCounter] = highValue;
-        s_tokenCounter++; //best practice to increase token counter BEFORE minting
-        _safeMint(msg.sender, s_tokenCounter);
-        emit NFTMinted(s_tokenCounter, highValue);
-    }
-
-    function _baseURI() internal pure override returns (string memory) {
-        return 'data:application/json;base64';
+        s_tokenIdToHighValue[s_tokenIdCounter] = highValue;
+        s_tokenIdCounter++; //best practice to increase token counter BEFORE minting
+        _safeMint(msg.sender, s_tokenIdCounter);
+        emit NFTMinted(s_tokenIdCounter, highValue);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
@@ -52,7 +49,7 @@ contract DynamicSvgNFT is ERC721 {
         }
         (, int256 price, , , ) = i_priceFeed.latestRoundData();
         string memory imageURI = s_lowImageURI;
-        //typcast price int to uint
+        //typcast price int to uint so can be compared with highPrice
         if (uint256(price) >= s_tokenIdToHighValue[tokenId]) {
             imageURI = s_highImageURI;
         }
