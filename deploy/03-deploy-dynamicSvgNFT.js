@@ -12,7 +12,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     const highSvg = fs.readFileSync('./NFT-images/dynamic/happy.svg', { encoding: 'utf8' })
 
     if (chainId == 31337) {
-        // Find ETH/USD price feed
+        // Get local ETH/USD price feed
         const EthUsdAggregator = await ethers.getContract('MockV3Aggregator')
         ethUsdPriceFeedAddress = EthUsdAggregator.address
     } else {
@@ -34,13 +34,5 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     if (chainId != 31337) {
         await verify(nftContract.address, args)
     }
-
-    // //mint call (highValue)
-    // const mintTx = await nftContract.mintNft(1500)
-    // const mintReceipt = await mintTx.wait(1)
-    // const tokenId = mintReceipt
-    // console.log('NFT minted!')
-
-    // //tokenURI view
-    // nftContract.tokenURI()
 }
+module.exports.tags = ['all', 'dynamic']

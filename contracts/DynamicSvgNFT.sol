@@ -11,19 +11,19 @@ contract DynamicSvgNFT is ERC721 {
     uint256 private s_tokenIdCounter;
     string private s_lowImageURI;
     string private s_highImageURI;
-    AggregatorV3Interface internal immutable i_priceFeed;
+    AggregatorV3Interface private immutable i_priceFeed;
     string private constant base64EncodedSvgPrefix = 'data:image/svg+xml;base64,';
 
     // highValue is the inflection point selected by each user for ETH price to render a different NFT image
-    mapping(uint256 => uint256) public s_tokenIdToHighValue;
+    mapping(uint256 => int256) public s_tokenIdToHighValue;
 
-    event NFTMinted(uint256 indexed tokenId, uint256 highValue);
+    event NFTMinted(uint256 indexed tokenId, int256 highValue);
 
     constructor(
         address priceFeedAddress,
         string memory lowSvg,
         string memory highSvg
-    ) ERC721('Dynamic SVG NFT', 'DYNAMO') {
+    ) ERC721('Dynamic SVG NFT', 'DSN') {
         s_tokenIdCounter = 0;
         s_lowImageURI = svgToImageURI(lowSvg);
         s_highImageURI = svgToImageURI(highSvg);
@@ -36,11 +36,15 @@ contract DynamicSvgNFT is ERC721 {
         return string(abi.encodePacked(base64EncodedSvgPrefix, svgBase64Encoded));
     }
 
-    function mintNft(uint256 highValue) public {
+    function mintNft(int256 highValue) public {
         s_tokenIdToHighValue[s_tokenIdCounter] = highValue;
         s_tokenIdCounter++; //best practice to increase token counter BEFORE minting
         _safeMint(msg.sender, s_tokenIdCounter);
         emit NFTMinted(s_tokenIdCounter, highValue);
+    }
+
+    function _baseURI() internal pure override returns (string memory) {
+        return 'data:application/json;base64,';
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
@@ -50,16 +54,16 @@ contract DynamicSvgNFT is ERC721 {
         (, int256 price, , , ) = i_priceFeed.latestRoundData();
         string memory imageURI = s_lowImageURI;
         //typcast price int to uint so can be compared with highPrice
-        if (uint256(price) >= s_tokenIdToHighValue[tokenId]) {
+        if (price >= s_tokenIdToHighValue[tokenId]) {
             imageURI = s_highImageURI;
         }
         return
             string(
                 abi.encodePacked(
-                    'data:application/json;base64', //need to concatenate to the beginning
+                    _baseURI(),
                     Base64.encode(
-                        bytes( //needs to be in bytes to be encoded in Base64
-                            abi.encodePacked( //JSON data
+                        bytes(
+                            abi.encodePacked(
                                 '{"name":"',
                                 name(), // You can add whatever name here
                                 '", "description":"An NFT that changes based on the Chainlink Feed", ',
@@ -71,5 +75,21 @@ contract DynamicSvgNFT is ERC721 {
                     )
                 )
             );
+    }
+
+    function getLowSVG() public view returns (string memory) {
+        return s_lowImageURI;
+    }
+
+    function getHighSVG() public view returns (string memory) {
+        return s_highImageURI;
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return i_priceFeed;
+    }
+
+    function getTokenCounter() public view returns (uint256) {
+        return s_tokenIdCounter;
     }
 }
