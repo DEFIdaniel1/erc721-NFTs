@@ -7,7 +7,7 @@ import 'base64-sol/base64.sol';
 
 error DynamicSvgNFT__TokenIdDoesNotExist();
 
-contract DynamicSvgNFT is ERC721 {
+contract DynamicSvgNFT2 is ERC721 {
     uint256 private s_tokenIdCounter;
     string private s_lowImageURI;
     string private s_highImageURI;
@@ -15,9 +15,9 @@ contract DynamicSvgNFT is ERC721 {
     string private constant base64EncodedSvgPrefix = 'data:image/svg+xml;base64,';
 
     // highValue is the inflection point selected by each user for ETH price to render a different NFT image
-    mapping(uint256 => int256) public s_tokenIdToHighValue;
+    mapping(uint256 => int256) public s_tokenIdToHighValues;
 
-    event NFTMinted(uint256 indexed tokenId, int256 highValue);
+    event NFTMinted(uint256 indexed tokenId, int256 indexed highValue);
 
     constructor(
         address priceFeedAddress,
@@ -37,9 +37,9 @@ contract DynamicSvgNFT is ERC721 {
     }
 
     function mintNft(int256 highValue) public {
-        s_tokenIdToHighValue[s_tokenIdCounter] = highValue;
-        s_tokenIdCounter++; //best practice to increase token counter BEFORE minting
+        s_tokenIdToHighValues[s_tokenIdCounter] = highValue;
         _safeMint(msg.sender, s_tokenIdCounter);
+        s_tokenIdCounter++; //best practice to increase token counter BEFORE minting
         emit NFTMinted(s_tokenIdCounter, highValue);
     }
 
@@ -53,8 +53,7 @@ contract DynamicSvgNFT is ERC721 {
         }
         (, int256 price, , , ) = i_priceFeed.latestRoundData();
         string memory imageURI = s_lowImageURI;
-        //typcast price int to uint so can be compared with highPrice
-        if (price >= s_tokenIdToHighValue[tokenId]) {
+        if (price >= s_tokenIdToHighValues[tokenId]) {
             imageURI = s_highImageURI;
         }
         return
@@ -65,7 +64,7 @@ contract DynamicSvgNFT is ERC721 {
                         bytes(
                             abi.encodePacked(
                                 '{"name":"',
-                                name(), // You can add whatever name here
+                                tokenId, // You can add whatever name here
                                 '", "description":"An NFT that changes based on the Chainlink Feed", ',
                                 '"attributes": [{"trait_type": "coolness", "value": 100}], "image":"',
                                 imageURI,

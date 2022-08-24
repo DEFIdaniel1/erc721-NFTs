@@ -47,7 +47,7 @@ contract RandomizedNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         uint32 callbackGasLimit,
         string[3] memory tokenURIs,
         uint256 mintFee
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721('Random Doggo', 'RANDY') {
+    ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721('Louie Art Works', 'LOUIE') {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;

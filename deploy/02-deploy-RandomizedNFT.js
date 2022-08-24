@@ -17,7 +17,7 @@ const metadataTemplate = {
     image: '',
     attributes: [{ trait_types: '', value: 100 }],
 }
-const tokenURIs = randomNFTTokenURIs
+let tokenURIs = randomNFTTokenURIs
 const vrfSubFundAmount = VRF_SUB_FUND_AMOUNT
 let vrfCoordinatorV2Mock
 
@@ -96,4 +96,4 @@ async function handleTokenUris() {
     return tokenURIs
 }
 
-module.exports.tags = ['all', 'random']
+module.exports.tags = ['all', 'random', 'contracts']

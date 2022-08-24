@@ -21,8 +21,8 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
 
     log('-------------Deploying DYNAMIC NFT-----------------')
     const args = [ethUsdPriceFeedAddress, lowSvg, highSvg]
-    const nftContract = await deploy('DynamicSvgNFT', {
-        contract: 'DynamicSvgNFT',
+    const nftContract = await deploy('DynamicSvgNFT2', {
+        contract: 'DynamicSvgNFT2',
         from: deployer,
         args: args,
         log: true,
@@ -35,4 +35,4 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
         await verify(nftContract.address, args)
     }
 }
-module.exports.tags = ['all', 'dynamic']
+module.exports.tags = ['all', 'dynamic', 'contracts']

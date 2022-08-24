@@ -11,6 +11,7 @@ const POLYGON_TEST_URL = process.env.POLYGON_TEST_URL || 'rinkeby-key'
 const PRIVATE_KEY = process.env.PRIVATE_KEY || '0x0noKey'
 const ETHERSCAN_API = process.env.ETHERSCAN_API || 'etherscan-key'
 const COINMARKETCAP_API = process.env.COINMARKETCAP_API || 'coinmarketcap-key'
+const GOERLI_URL = process.env.GOERLI_URL || 'goerli-url'
 
 module.exports = {
     solidity: {
@@ -35,6 +36,12 @@ module.exports = {
             url: 'http://127.0.0.1:8545/',
             chainId: 31337,
             blockConfirmations: 1,
+        },
+        goerli: {
+            url: GOERLI_URL,
+            accounts: [PRIVATE_KEY],
+            chainId: 5,
+            blockConfirmations: 6,
         },
     },
     etherscan: {

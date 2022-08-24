@@ -20,9 +20,10 @@ const networkConfig = {
     },
     5: {
         name: 'goerli',
-        ethUsdPriceFeed: '0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e',
+        ethUsdPriceFeed: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
         vrfCoordinatorV2: '0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D',
         gasLane: '0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15', //30 gwei
+        callbackGasLimit: '500000', // 500,000 gas
         subscriptionId: '337',
         mintFee: '20000000000000000', // 0.02 ETH
         blockConfirmations: 6,
@@ -39,9 +40,9 @@ const DECIMALS = '18'
 const INITIAL_PRICE = '200000000000000000000'
 const VRF_SUB_FUND_AMOUNT = '10000000000000000000' //10 LINK
 const randomNFTTokenURIs = [
-    'QmaHJeNRETkCgpvUrd5xxmAhea6eoUpsdtXqy3Cwym2GAM',
-    'QmcztQp4He8sf3hfSe4A3mQGEvpjfPD6x3cweYpmqw5K9K',
-    'QmPeQgDwgzRsQJyVfq8vgqmN4zxGwoVxRzi34z8YC4cdgf',
+    'ipfs://QmaHJeNRETkCgpvUrd5xxmAhea6eoUpsdtXqy3Cwym2GAM',
+    'ipfs://QmcztQp4He8sf3hfSe4A3mQGEvpjfPD6x3cweYpmqw5K9K',
+    'ipfs://QmPeQgDwgzRsQJyVfq8vgqmN4zxGwoVxRzi34z8YC4cdgf',
 ]
 
 module.exports = {
