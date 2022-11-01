@@ -1,0 +1,30 @@
+{
+  "devDependencies": {
+    "@chainlink/contracts": "^0.4.2",
+    "@ethersproject/abi": "^5.4.7",
+    "@ethersproject/providers": "^5.4.7",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^1.0.1",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
+    "@nomiclabs/hardhat-etherscan": "^3.0.0",
+    "@openzeppelin/contracts": "^4.7.3",
+    "@pinata/sdk": "^1.1.26",
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typechain/hardhat": "^6.1.2",
+    "base64-sol": "^1.1.0",
+    "chai": "^4.2.0",
+    "dotenv": "^16.0.1",
+    "ethers": "^5.4.7",
+    "fs": "^0.0.1-security",
+    "hardhat": "^2.10.1",
+    "hardhat-deploy": "^0.11.12",
+    "hardhat-gas-reporter": "^1.0.8",
+    "path": "^0.12.7",
+    "prettier": "^2.7.1",
+    "prettier-config-solidity": "^1.8.0",
+    "prettier-plugin-solidity": "^1.0.0-beta.24",
+    "solidity-coverage": "^0.7.21",
+    "typechain": "^8.1.0"
+  }
+}
