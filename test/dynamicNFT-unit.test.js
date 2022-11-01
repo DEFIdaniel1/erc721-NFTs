@@ -18,6 +18,7 @@ const lowTokenUri =
           let dynamicSvgNft, deployer, mockV3Aggregator
 
           beforeEach(async () => {
+            // Connect network, accounts, mocks, and contract
               accounts = await ethers.getSigners()
               deployer = accounts[0]
               await deployments.fixture(['mocks', 'dynamic'])
@@ -55,7 +56,5 @@ const lowTokenUri =
               })
           })
 
-          // probably want more tests checking the svg -> token URI conversion svgToImageURI
-          // More coverage of course
-          // Maybe some tokenURI oddities
+          // To Do: add more coverage
       })

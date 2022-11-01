@@ -4,6 +4,7 @@ const { ethers } = require('hardhat')
 describe('BasicNFT Unit Test', function () {
     let deploy, deployer, basicNFTContract
     beforeEach(async function () {
+        // Connect account to network, deploy contract
         accounts = await ethers.getSigners()
         deployer = accounts[0]
         const BasicNFTContract = await ethers.getContractFactory('BasicNFT')
@@ -19,11 +20,11 @@ describe('BasicNFT Unit Test', function () {
             assert.equal(tokenCounter.toString(), expectedValue)
         })
         it('NFT name and symbol are correct', async function () {
-            const expectedName = 'louieNFT'
+            const expectedName = 'Ultra Rare Item'
             const actualName = await basicNFTContract.name()
             assert.equal(expectedName, actualName)
 
-            const expectedSymbol = 'LOUIE'
+            const expectedSymbol = 'URI'
             const actualSymbol = await basicNFTContract.symbol()
             assert.equal(expectedSymbol, actualSymbol)
         })
