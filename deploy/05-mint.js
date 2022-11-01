@@ -11,7 +11,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     // console.log(`Basic NFT index 0 has tokenURI: ${await basicNft.tokenURI(0)}`)
 
     // //RandomNFT Mint
-    // const randomNft = await ethers.getContract('RandomizedNFT', deployer)
+    // const randomNft = await ethers.getContract('RandomSword', deployer)
     // const mintFee = await randomNft.getMintFee()
 
     // await new Promise(async (resolve, reject) => {

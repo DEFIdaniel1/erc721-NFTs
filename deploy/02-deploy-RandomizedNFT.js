@@ -54,14 +54,14 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         networkConfig[chainId].mintFee,
     ]
 
-    const randomizedNftContract = await deploy('RandomizedNFT', {
-        contract: 'RandomizedNFT',
+    const randomizedNftContract = await deploy('RandomSword', {
+        contract: 'RandomSword',
         from: deployer,
         args: args,
         log: true,
         waitConfirmations: networkConfig.blockConfirmations || 1,
     })
-    log('----------randomizedNFT contract deployed-------------------')
+    log('----------randomSword contract deployed-------------------')
 
     if (chainId == 31337) {
         //need to add consumer AFTER deploying contract
