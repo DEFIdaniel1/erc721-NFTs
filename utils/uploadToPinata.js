@@ -8,10 +8,10 @@ const pinata = pinataSDK(pinataAPIKey, pinataAPISecret)
 
 // Stores images to IPFS via pinata
 // Need to send readable file stream
+// Response object contains IPFS hash
 async function storeImages(imagesFilePath) {
     const fullImagesPath = path.resolve(imagesFilePath)
     const imageFiles = fs.readdirSync(fullImagesPath)
-
     console.log('Uploading images to IPFS...')
     let responses = []
     for (i in imageFiles) {
