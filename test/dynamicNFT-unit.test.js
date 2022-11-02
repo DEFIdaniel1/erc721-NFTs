@@ -18,7 +18,7 @@ const lowTokenUri =
           let dynamicSvgNft, deployer, mockV3Aggregator
 
           beforeEach(async () => {
-            // Connect network, accounts, mocks, and contract
+              // Connect network, accounts, mocks, and contract
               accounts = await ethers.getSigners()
               deployer = accounts[0]
               await deployments.fixture(['mocks', 'dynamic'])
@@ -40,7 +40,10 @@ const lowTokenUri =
           describe('mintNft', () => {
               it('emits an event and creates the NFT', async function () {
                   const highValue = ethers.utils.parseEther('500') // 1 dollar per ether
-                  await expect(dynamicSvgNft.mintNft(highValue)).to.emit(dynamicSvgNft, 'NFTMinted')
+                  await expect(dynamicSvgNft.mintNft(highValue)).to.emit(
+                      dynamicSvgNft,
+                      'NFTMinted'
+                  )
                   const tokenCounter = await dynamicSvgNft.getTokenCounter()
                   assert.equal(tokenCounter.toString(), '1')
                   const tokenURI = await dynamicSvgNft.tokenURI(1)

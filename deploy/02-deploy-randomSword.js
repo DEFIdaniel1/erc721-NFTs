@@ -2,22 +2,25 @@ const { network, ethers } = require('hardhat')
 const {
     developmentChains,
     networkConfig,
-    randomNFTTokenURIs,
+    randomSwordURIs,
     VRF_SUB_FUND_AMOUNT,
 } = require('../helper-hardhat-config')
 const { verify } = require('../utils/verify')
-const { storeImages, storeTokenURIMetadata } = require('../utils/uploadToPinata')
+const {
+    storeImages,
+    storeTokenURIMetadata,
+} = require('../utils/uploadToPinata')
 
-const imagesLocation = './NFT-images/random'
+const imagesLocation = './NFT-images/swords'
 const pinataUploadStatus = process.env.UPLOAD_TO_PINATA
 const chainId = network.config.chainId
 const metadataTemplate = {
     name: '',
     description: '',
     image: '',
-    attributes: [{ trait_types: '', value: 100 }],
+    attributes: [],
 }
-let tokenURIs = randomNFTTokenURIs
+let tokenURIs = randomSwordURIs
 const vrfSubFundAmount = VRF_SUB_FUND_AMOUNT
 let vrfCoordinatorV2Mock
 
@@ -25,15 +28,16 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
     const { deploy, log } = deployments
     let vrfCoordinatorV2Address, subscriptionId
-    // For the URIs, we need to upload the images, get IPFS hashes
-    // 3 methods: yourself, a centralied service like pinata, nft.storage(uses filecoin)
-    // only doing pinata here
+
+    // For the URIs, we need to upload the images, and get the IPFS hashes first
+    // If upload needed, set env pinataUploadStatus to true
     if (pinataUploadStatus == 'true') {
         tokenURIs = await handleTokenUris()
     } else {
         log(`IPFS status = ${pinataUploadStatus}. No IPFS upload.`)
     }
 
+    // If development chain is set to hardhat or localhost, run mocks
     if (developmentChains.includes(network.name)) {
         vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock')
         vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address
@@ -41,10 +45,12 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         const txReceipt = await tx.wait(1)
         subscriptionId = txReceipt.events[0].args.subId
     } else {
+        // Else use the vrfCoordinator address/ subscription for the relevant chain
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
         subscriptionId = networkConfig[chainId].subscriptionId
     }
 
+    // Contract constructor args
     const args = [
         vrfCoordinatorV2Address,
         subscriptionId,
@@ -54,7 +60,8 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         networkConfig[chainId].mintFee,
     ]
 
-    const randomizedNftContract = await deploy('RandomSword', {
+    // Deploy contract
+    const randomSwordContract = await deploy('RandomSword', {
         contract: 'RandomSword',
         from: deployer,
         args: args,
@@ -63,33 +70,55 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
     })
     log('----------randomSword contract deployed-------------------')
 
+    // Connects VRF coordinator mock with new contract. Funds with LINK or tests will fail
+    // Consumer (contract address) required to be added to Chainlink oracle vrfContract
     if (chainId == 31337) {
-        //need to add consumer AFTER deploying contract
-        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, randomizedNftContract.address)
+        await vrfCoordinatorV2Mock.addConsumer(
+            subscriptionId,
+            randomSwordContract.address
+        )
         log('VRF mock consumer added!')
-        //need to fund it with LINK or tests will fail
-        await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, vrfSubFundAmount)
+        await vrfCoordinatorV2Mock.fundSubscription(
+            subscriptionId,
+            vrfSubFundAmount
+        )
         log('VRF mock contract funded.')
     }
     if (chainId != 31337) {
-        await verify(randomizedNftContract.address, args)
+        await verify(randomSwordContract.address, args)
     }
 }
 
+/**
+ * Function uploads images and metadata to IPFS
+ * storeImages function stores the images on Pinata and get the IPFS address - input(image path)
+ *  > returns responses(IPFS hashes to array), files(image files)
+ * Function builds out metadata files using template, adds newly stored images
+ * Metatada is then stored to IPFS via pinata
+ */
 async function handleTokenUris() {
     console.log('------------IPFS Upload----------------------')
     tokenURIs = []
-    const { responses: imageUploadResponses, files } = await storeImages(imagesLocation)
-    // imageuploadresponses is an object with IpfsHash as one of the items
-    // files are the file names 'image.png'
+
+    // Save images to IPFS
+    const { responses: imageUploadResponses, imageFiles: files } =
+        await storeImages(imagesLocation)
     for (i in imageUploadResponses) {
         let tokenURIMetadata = metadataTemplate
-        tokenURIMetadata.name = files[i].replace('.jpg', '').replace('-', ' ') //remove .jpg and - from file names
-        tokenURIMetadata.description = `One of a kind, original art work by Louie Pisterzi.`
-        tokenURIMetadata.image = `ipfs://${imageUploadResponses[i].IpfsHash}` //image hashes
+        // Building URI metadata
+        // Get the item name from the file by removing .jpeg/png/-
+        tokenURIMetadata.name = files[i]
+            .replace('.jpeg', '')
+            .replace('.png', '')
+            .replace('-', ' ')
+        tokenURIMetadata.description = `Incredible random sword generation. Will you get the iron, steel or diamond sword? Looks like you received the ${tokenURIMetadata.name}!`
+        tokenURIMetadata.attributes = [{ Stength: '5', Damage: '50' }]
+        tokenURIMetadata.image = `ipfs://${imageUploadResponses[i].IpfsHash}` //get the image hashes
         console.log(`Uploading JSON file ${tokenURIMetadata.name}...`)
-        const uploadResponse = await storeTokenURIMetadata(tokenURIMetadata) //upload to IPFS
-        tokenURIs.push(uploadResponse.IpfsHash) //hash from the JSON metadata files
+
+        // Upload token metadata
+        const uploadResponse = await storeTokenURIMetadata(tokenURIMetadata)
+        tokenURIs.push(uploadResponse.IpfsHash) //get the JSON data hash
     }
     console.log(tokenURIs)
     console.log('------------------------------------------------')

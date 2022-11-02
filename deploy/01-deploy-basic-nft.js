@@ -7,6 +7,7 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
     const chainId = network.config.chainId
     const args = []
 
+    // Deploy Basic NFT contract
     const nftContract = await deploy('BasicNFT', {
         contract: 'BasicNFT',
         from: deployer,
@@ -15,6 +16,7 @@ module.exports = async function main({ getNamedAccounts, deployments }) {
         waitConfirmations: network.config.blockConfirmations || 1,
     })
 
+    // Verify contract if not on testnet
     if (chainId != 31337) {
         await verify(nftContract.address, args)
     }

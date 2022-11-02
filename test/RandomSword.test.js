@@ -1,22 +1,28 @@
 const { assert, expect } = require('chai')
 const { deployments, ethers, network } = require('hardhat')
-const { networkConfig, randomNFTTokenURIs, developmentChains } = require('../helper-hardhat-config')
+const {
+    networkConfig,
+    randomSwordURIs,
+    developmentChains,
+} = require('../helper-hardhat-config')
 
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe('Randomize NFT Unit Test', function () {
-        // Connect network
+          // Connect network
           const chainId = network.config.chainId
           let deployer, randomSwordContract, account1, vrfCoordinatorV2Mock
           const mintFee = networkConfig[chainId].mintFee
           beforeEach(async function () {
-            // Connect accounts, deploy mocks & contract
+              // Connect accounts, deploy mocks & contract
               const accounts = await ethers.getSigners()
               deployer = accounts[0]
               account1 = accounts[1]
               await deployments.fixture(['mocks', 'random'])
               randomSwordContract = await ethers.getContract('RandomSword')
-              vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock')
+              vrfCoordinatorV2Mock = await ethers.getContract(
+                  'VRFCoordinatorV2Mock'
+              )
           })
           describe('Constructor', async function () {
               it('Deploys contract to an address', async function () {
@@ -28,7 +34,8 @@ const { networkConfig, randomNFTTokenURIs, developmentChains } = require('../hel
               })
               it('Deploys correct callbackGasLimit', async function () {
                   let expectedValue = networkConfig[chainId].callbackGasLimit
-                  const callbackGasLimit = await randomSwordContract.getCallbackGasLimit()
+                  const callbackGasLimit =
+                      await randomSwordContract.getCallbackGasLimit()
                   assert.equal(expectedValue, callbackGasLimit.toString())
               })
               it('Deploys correct gasLane', async function () {
@@ -37,7 +44,7 @@ const { networkConfig, randomNFTTokenURIs, developmentChains } = require('../hel
                   assert.equal(expectedValue, gasLane.toString())
               })
               it('Deploys with correct NFT URIs', async function () {
-                  let expectedValue = randomNFTTokenURIs
+                  let expectedValue = randomSwordURIs
                   let uriValue
                   for (let i = 0; i < expectedValue.length; i++) {
                       uriValue = await randomSwordContract.getTokenURI(i)
@@ -57,18 +64,21 @@ const { networkConfig, randomNFTTokenURIs, developmentChains } = require('../hel
                   )
               })
               it('Emits event NFTRequested', async function () {
-                  await expect(randomSwordContract.requestNFT({ value: mintFee })).to.emit(
-                      randomSwordContract,
-                      'NFTRequested'
-                  )
+                  await expect(
+                      randomSwordContract.requestNFT({ value: mintFee })
+                  ).to.emit(randomSwordContract, 'NFTRequested')
               })
               it('Maps requestIdToSender', async function () {
                   await randomSwordContract.requestNFT({ value: mintFee })
-                  await randomSwordContract.connect(account1).requestNFT({ value: mintFee })
+                  await randomSwordContract
+                      .connect(account1)
+                      .requestNFT({ value: mintFee })
                   // Mapping requestIDs start at 1, not 0
-                  const nftAccountMapToDeployer = await randomSwordContract.s_requestIdToSender(1)
+                  const nftAccountMapToDeployer =
+                      await randomSwordContract.s_requestIdToSender(1)
                   assert.equal(nftAccountMapToDeployer, deployer.address)
-                  const nftAccountMapToAccount1 = await randomSwordContract.s_requestIdToSender(2)
+                  const nftAccountMapToAccount1 =
+                      await randomSwordContract.s_requestIdToSender(2)
                   assert.equal(nftAccountMapToAccount1, account1.address)
               })
           })

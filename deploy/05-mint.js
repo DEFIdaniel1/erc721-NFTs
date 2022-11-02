@@ -32,7 +32,7 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     // console.log(`RandomNFT index 2 tokenURI: ${await randomNft.getTokenURI(2)}`)
 
     // //DynamicNFT Mint
-    const dynamicNft = await ethers.getContract('DynamicSvgNFT2', deployer)
+    const dynamicNft = await ethers.getContract('DynamicSvgNFT', deployer)
 
     const highValue = ethers.utils.parseEther('1000')
     const dynamicMintTx = await dynamicNft.mintNft(highValue.toString())

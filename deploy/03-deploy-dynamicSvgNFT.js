@@ -8,8 +8,12 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
     const { deployer } = await getNamedAccounts()
     let ethUsdPriceFeedAddress
     const chainId = network.config.chainId
-    const lowSvg = fs.readFileSync('./NFT-images/dynamic/frown.svg', { encoding: 'utf8' })
-    const highSvg = fs.readFileSync('./NFT-images/dynamic/happy.svg', { encoding: 'utf8' })
+    const lowSvg = fs.readFileSync('./NFT-images/dynamic/frown.svg', {
+        encoding: 'utf8',
+    })
+    const highSvg = fs.readFileSync('./NFT-images/dynamic/happy.svg', {
+        encoding: 'utf8',
+    })
 
     if (chainId == 31337) {
         // Get local ETH/USD price feed
@@ -21,8 +25,8 @@ module.exports = async function ({ deployments, getNamedAccounts }) {
 
     log('-------------Deploying DYNAMIC NFT-----------------')
     const args = [ethUsdPriceFeedAddress, lowSvg, highSvg]
-    const nftContract = await deploy('DynamicSvgNFT2', {
-        contract: 'DynamicSvgNFT2',
+    const nftContract = await deploy('DynamicSvgNFT', {
+        contract: 'DynamicSvgNFT',
         from: deployer,
         args: args,
         log: true,
